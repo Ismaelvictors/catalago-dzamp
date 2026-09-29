@@ -13,7 +13,7 @@
   --radius: 14px;
   --shadow: 0 10px 30px rgb(16 20 24 / 8%);
   --shadow-lg: 0 24px 60px rgb(16 20 24 / 16%);
-  --header-h: 76px;
+  --header-h: 185px;
   color: var(--ink);
   font-family:
     'Segoe UI',
@@ -58,8 +58,7 @@ select {
 
 /* ---------- Header ---------- */
 .header {
-  position: fixed;
-  inset: 0 0 auto 0;
+  position: relative;
   height: var(--header-h);
   background: transparent;
   z-index: 40;
@@ -81,7 +80,7 @@ select {
 }
 
 .header-logo img {
-  height: 52px;
+  height: 170px;
   width: auto;
   filter: drop-shadow(0 2px 6px rgb(16 20 24 / 12%));
 }
@@ -174,12 +173,12 @@ select {
 .catalog {
   max-width: 1240px;
   margin: 0 auto;
-  padding: calc(var(--header-h) + 24px) 24px 80px;
+  padding: 0 24px 80px;
 }
 
 /* ---------- Hero ---------- */
 .hero {
-  padding: 56px 0 30px;
+  padding: 8px 0 28px;
   max-width: 680px;
 }
 
@@ -209,16 +208,14 @@ select {
   font-size: 1.05rem;
 }
 
+.chips-bar {
+  padding: 14px 0 22px;
+}
+
 .chips {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
-  padding: 14px 0 22px;
-  position: sticky;
-  top: var(--header-h);
-  background: rgb(251 251 249 / 82%);
-  backdrop-filter: blur(8px);
-  z-index: 30;
 }
 
 .chip {
@@ -788,7 +785,7 @@ select {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: calc(var(--header-h) + 20px) 20px 40px;
+  padding: 20px 20px 40px;
   background: linear-gradient(160deg, var(--blue-pastel-soft), var(--bg));
 }
 
@@ -829,7 +826,7 @@ select {
 .admin {
   max-width: 960px;
   margin: 0 auto;
-  padding: calc(var(--header-h) + 28px) 20px 80px;
+  padding: 28px 20px 80px;
 }
 
 .admin-head {
@@ -1063,6 +1060,10 @@ select {
 
 /* ---------- Responsive ---------- */
 @media (max-width: 720px) {
+  :root {
+    --header-h: 124px;
+  }
+
   .product-modal {
     grid-template-columns: 1fr;
   }
@@ -1080,7 +1081,7 @@ select {
   }
 
   .header-logo img {
-    height: 40px;
+    height: 100px;
   }
 
   .sacola-btn {

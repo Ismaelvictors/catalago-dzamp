@@ -202,7 +202,11 @@ export function Catalog({
         </p>
       </section>
 
-      <CategoryChips active={category} onChange={setCategory} />
+      <div className="chips-bar">
+        <div className="chips-inner">
+          <CategoryChips active={category} onChange={setCategory} />
+        </div>
+      </div>
 
       {loadError && <p className="catalog-error">{loadError}</p>}
       {!loadError && products === null && <div className="catalog-loading">Carregando catálogo...</div>}
