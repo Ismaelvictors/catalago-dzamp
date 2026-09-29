@@ -56,22 +56,26 @@ select {
   font-size: 0.88rem;
 }
 
-/* ---------- Header ---------- */
+/* ---------- Header (transparente sobre o gradiente) ---------- */
 .header {
   position: relative;
-  height: var(--header-h);
-  background: transparent;
   z-index: 40;
+  padding: 6px 24px 10px;
 }
 
-.header-inner {
+.header-card {
   max-width: 1240px;
-  height: 100%;
   margin: 0 auto;
-  padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 20px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 56px;
 }
 
 .header-logo {
@@ -80,9 +84,8 @@ select {
 }
 
 .header-logo img {
-  height: 170px;
+  height: 200px;
   width: auto;
-  filter: drop-shadow(0 2px 6px rgb(16 20 24 / 12%));
 }
 
 .header-right {
@@ -95,14 +98,14 @@ select {
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 9px;
+  justify-content: center;
   border: none;
   border-radius: 999px;
   background: var(--red);
   color: var(--white);
   font-weight: 700;
   font-size: 0.95rem;
-  padding: 12px 22px;
+  padding: 14px;
   box-shadow: 0 10px 24px rgb(200 35 42 / 35%);
   transition: all 0.15s ease;
 }
@@ -113,6 +116,9 @@ select {
 }
 
 .sacola-badge {
+  position: absolute;
+  top: -7px;
+  right: -5px;
   min-width: 21px;
   height: 21px;
   padding: 0 6px;
@@ -123,6 +129,80 @@ select {
   font-weight: 800;
   display: grid;
   place-items: center;
+  box-shadow: 0 2px 6px rgb(16 20 24 / 18%);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hamburger-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--red);
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--red);
+  width: 46px;
+  height: 46px;
+  transition: all 0.15s ease;
+}
+
+.hamburger-btn:hover {
+  background: rgb(200 35 42 / 8%);
+}
+
+/* ---------- Menu lateral (mobile) ---------- */
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(320px, 78vw);
+  background: var(--white);
+  z-index: 80;
+  transform: translateX(105%);
+  transition: transform 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+}
+
+.mobile-menu.open {
+  transform: translateX(0);
+}
+
+.mobile-menu-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+}
+
+.mobile-menu-nav a {
+  color: var(--red);
+  background: var(--white);
+  border: 1.5px solid var(--red);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.05rem;
+  padding: 14px 20px;
+  border-radius: 999px;
+  text-align: center;
+  transition: all 0.15s ease;
+}
+
+.mobile-menu-nav a:hover {
+  background: rgb(200 35 42 / 8%);
+}
+
+.mobile-menu-nav a.active {
+  background: var(--red);
+  color: var(--white);
+  box-shadow: 0 8px 18px rgb(200 35 42 / 30%);
 }
 
 .brand,
@@ -150,23 +230,29 @@ select {
 
 .header-nav {
   display: flex;
-  gap: 8px;
+  gap: 10px;
 }
 
 .header-nav a {
-  color: var(--ink-soft);
+  color: var(--red);
+  background: var(--white);
+  border: 1.5px solid var(--red);
   text-decoration: none;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.92rem;
-  padding: 8px 14px;
+  padding: 9px 20px;
   border-radius: 999px;
-  transition: background 0.15s ease;
+  transition: all 0.15s ease;
 }
 
-.header-nav a.active,
 .header-nav a:hover {
-  background: var(--blue-pastel);
-  color: var(--ink);
+  background: rgb(200 35 42 / 8%);
+}
+
+.header-nav a.active {
+  background: var(--red);
+  color: var(--white);
+  box-shadow: 0 8px 18px rgb(200 35 42 / 30%);
 }
 
 /* ---------- Catalog ---------- */
@@ -174,6 +260,156 @@ select {
   max-width: 1240px;
   margin: 0 auto;
   padding: 0 24px 80px;
+}
+
+/* ---------- Home ---------- */
+.hero-cta {
+  margin-top: 22px;
+  padding: 14px 28px;
+  font-size: 1rem;
+  border-radius: 12px;
+}
+
+.home-featured {
+  padding-top: 26px;
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.section-head h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  letter-spacing: -0.01em;
+}
+
+.see-all {
+  color: var(--red);
+  font-weight: 700;
+  font-size: 0.92rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.see-all:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Contacts ---------- */
+.hero-small h1 {
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 26px;
+  align-items: start;
+}
+
+.contact-info {
+  background: var(--white);
+  border-radius: 18px;
+  box-shadow: 0 10px 28px rgb(16 20 24 / 8%);
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contact-info h2,
+.contact-form-card h2 {
+  margin: 0 0 4px;
+  font-size: 1.2rem;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  text-decoration: none;
+  color: var(--ink);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.contact-item > span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.contact-item:hover {
+  border-color: var(--red);
+  box-shadow: 0 6px 16px rgb(200 35 42 / 10%);
+}
+
+.contact-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgb(200 35 42 / 8%);
+  color: var(--red);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.contact-form-card {
+  background: var(--white);
+  border-radius: 18px;
+  box-shadow: 0 10px 28px rgb(16 20 24 / 8%);
+  padding: 26px;
+}
+
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.contact-form .field input {
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.contact-form .field input:focus {
+  outline: none;
+  border-color: var(--red);
+}
+
+.contact-success {
+  margin-top: 14px;
+  background: #eaf7ef;
+  border: 1.5px solid #bfe5cd;
+  border-radius: 14px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.contact-success strong {
+  color: #1c7c3c;
+  font-size: 1.05rem;
+}
+
+.contact-success p {
+  margin: 0;
+  color: var(--ink-soft);
 }
 
 /* ---------- Hero ---------- */
@@ -240,6 +476,15 @@ select {
   border-color: var(--red);
   color: var(--white);
   box-shadow: 0 8px 20px rgb(200 35 42 / 30%);
+}
+
+/* Filtro mobile (bottom sheet) — oculto no desktop */
+.filter-btn {
+  display: none;
+}
+
+.filter-sheet {
+  display: none;
 }
 
 .grid {
@@ -1060,37 +1305,139 @@ select {
 
 /* ---------- Responsive ---------- */
 @media (max-width: 720px) {
-  :root {
-    --header-h: 124px;
+  .header {
+    padding: 10px 14px 8px;
   }
 
-  .product-modal {
-    grid-template-columns: 1fr;
+  .header-card {
+    align-items: center;
+    gap: 10px;
   }
 
-  .form-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .hero {
-    padding-top: 18px;
-  }
-
-  .header-nav a {
-    padding: 8px 10px;
+  .header-left {
+    gap: 10px;
   }
 
   .header-logo img {
     height: 100px;
   }
 
-  .sacola-btn {
-    padding: 10px 16px;
-    font-size: 0.88rem;
+  .header-nav {
+    display: none;
   }
 
-  .header-right {
-    gap: 8px;
+  .header-actions {
+    gap: 10px;
+  }
+
+  .hamburger-btn {
+    display: inline-flex;
+    width: 42px;
+    height: 42px;
+  }
+
+  .chips-bar {
+    display: none;
+  }
+
+  .filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    border: 1.5px solid var(--red);
+    background: var(--white);
+    color: var(--red);
+    font-weight: 700;
+    font-size: 0.68rem;
+    padding: 4px 9px;
+    border-radius: 999px;
+    margin: 8px 0 12px;
+    transition: all 0.15s ease;
+  }
+
+  .filter-btn svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  .filter-btn:hover {
+    background: rgb(200 35 42 / 8%);
+  }
+
+  .filter-sheet {
+    display: flex;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--white);
+    z-index: 80;
+    transform: translateY(105%);
+    transition: transform 0.25s ease;
+    flex-direction: column;
+    border-radius: 18px 18px 0 0;
+    box-shadow: var(--shadow-lg);
+    max-height: 70vh;
+  }
+
+  .filter-sheet.open {
+    transform: translateY(0);
+  }
+
+  .filter-sheet-body {
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  .filter-sheet .chips {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .filter-sheet .chip {
+    text-align: center;
+    padding: 14px 20px;
+    font-size: 1rem;
+    border: 1.5px solid var(--line);
+  }
+
+  .filter-sheet-foot {
+    padding: 14px 20px calc(18px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .apply-btn {
+    width: 100%;
+    border: none;
+    border-radius: 999px;
+    background: var(--red);
+    color: var(--white);
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 14px;
+    box-shadow: 0 10px 24px rgb(200 35 42 / 35%);
+  }
+
+  .sacola-btn {
+    position: fixed;
+    bottom: 18px;
+    right: 16px;
+    z-index: 60;
+    width: 56px;
+    height: 56px;
+    padding: 0;
+  }
+
+  .contact-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-modal {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    padding-top: 18px;
   }
 
   .card-actions {

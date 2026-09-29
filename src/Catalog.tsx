@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import type { Category, CartItem, Product } from './types';
 import { CATEGORIES, CATEGORY_LABELS, formatBRL, sizesFor } from './lib';
 
-function CategoryChips({ active, onChange }: { active: Category | 'all'; onChange: (c: Category | 'all') => void }) {
+export function CategoryChips({ active, onChange }: { active: Category | 'all'; onChange: (c: Category | 'all') => void }) {
   return (
     <div className="chips">
       {CATEGORIES.map((c) => (
@@ -18,7 +18,7 @@ function CategoryChips({ active, onChange }: { active: Category | 'all'; onChang
   );
 }
 
-function ProductCard({ product, onDetails, onQuickAdd }: { product: Product; onDetails: () => void; onQuickAdd: () => void }) {
+export function ProductCard({ product, onDetails, onQuickAdd }: { product: Product; onDetails: () => void; onQuickAdd: () => void }) {
   return (
     <article className="card">
       <button className="card-media" onClick={onDetails} aria-label={`Ver detalhes de ${product.title}`}>
@@ -157,7 +157,7 @@ function ProductModal({
   );
 }
 
-export function Catalog({
+export function CatalogPage({
   products,
   loadError,
   onAdd,
@@ -168,6 +168,7 @@ export function Catalog({
 }) {
   const [category, setCategory] = useState<Category | 'all'>('all');
   const [selected, setSelected] = useState<Product | null>(null);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   const filtered = useMemo(
     () => (products ?? []).filter((p) => category === 'all' || p.category === category),
@@ -190,23 +191,16 @@ export function Catalog({
 
   return (
     <main className="catalog">
-      <section className="hero">
-        <p className="hero-eyebrow">Vestuário Esportivo Premium</p>
-        <h1>
-          Estilo, performance
-          <br />e proteção para todos.
-        </h1>
-        <p className="hero-copy">
-          Explore as coleções DZAMP: linha infantil, jovem/adulto e camisetas com proteção UV.
-          Escolha, monte sua sacola e finalize pelo WhatsApp.
-        </p>
-      </section>
-
       <div className="chips-bar">
-        <div className="chips-inner">
-          <CategoryChips active={category} onChange={setCategory} />
-        </div>
+        <CategoryChips active={category} onChange={setCategory} />
       </div>
+
+      <button className="filter-btn" onClick={() => setFilterOpen(true)}>
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 5h18l-7 8v5l-4 2v-7L3 5Z" />
+        </svg>
+        Filtrar{category !== 'all' ? ` · ${CATEGORY_LABELS[category]}` : ''}
+      </button>
 
       {loadError && <p className="catalog-error">{loadError}</p>}
       {!loadError && products === null && <div className="catalog-loading">Carregando catálogo...</div>}
@@ -229,6 +223,26 @@ export function Catalog({
       </div>
 
       {selected && <ProductModal product={selected} onClose={() => setSelected(null)} onAdd={onAdd} />}
+
+      <div className={`overlay ${filterOpen ? 'show' : ''}`} onClick={() => setFilterOpen(false)} />
+      <aside className={`filter-sheet ${filterOpen ? 'open' : ''}`} aria-hidden={!filterOpen}>
+        <div className="cart-head">
+          <h2>Filtrar por</h2>
+          <button className="icon-btn" onClick={() => setFilterOpen(false)} aria-label="Fechar filtros">✕</button>
+        </div>
+        <div className="filter-sheet-body">
+          <CategoryChips
+            active={category}
+            onChange={(c) => {
+              setCategory(c);
+              setFilterOpen(false);
+            }}
+          />
+        </div>
+        <div className="filter-sheet-foot">
+          <button className="apply-btn" onClick={() => setFilterOpen(false)}>Aplicar</button>
+        </div>
+      </aside>
     </main>
   );
 }

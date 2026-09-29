@@ -1,10 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { CartItem, Product } from './types';
 import { buildWhatsappLink, fetchProducts, fetchWhatsappNumber, formatBRL } from './lib';
-import { Catalog } from './Catalog';
-import { Admin } from './Admin';
+import { HomePage } from './Home';
+import { CatalogPage } from './Catalog';
+import { ContactsPage } from './Contacts';
 
 const CART_KEY = 'dzamp_cart';
+
+type Route = 'home' | 'catalogo' | 'contatos';
+
+function parseRoute(): Route {
+  const hash = window.location.hash;
+  if (hash.startsWith('#/catalogo')) return 'catalogo';
+  if (hash.startsWith('#/contatos')) return 'contatos';
+  return 'home';
+}
 
 function loadCart(): CartItem[] {
   try {
@@ -14,34 +24,75 @@ function loadCart(): CartItem[] {
   }
 }
 
-function Header({ route, cartCount, onCartClick }: { route: string; cartCount: number; onCartClick: () => void }) {
+function Header({ route, cartCount, onCartClick }: { route: Route; cartCount: number; onCartClick: () => void }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const links: { to: string; label: string; key: Route }[] = [
+    { to: '#/', label: 'Home', key: 'home' },
+    { to: '#/catalogo', label: 'Catálogo', key: 'catalogo' },
+    { to: '#/contatos', label: 'Contatos', key: 'contatos' },
+  ];
+
   return (
     <header className="header">
-      <div className="header-inner">
-        <a
-          href="#/"
-          className="header-logo"
-          onClick={() => {
-            if (route === 'admin') window.location.hash = '#/';
-          }}
-        >
-          <img src="/images/logo.png" alt="DZAMP" />
-        </a>
-        <div className="header-right">
+      <div className="header-card">
+        <div className="header-left">
+          <a
+            href="#/"
+            className="header-logo"
+            onClick={() => {
+              if (route !== 'home') window.location.hash = '#/';
+            }}
+          >
+            <img src="/images/logo.png" alt="DZAMP" />
+          </a>
           <nav className="header-nav">
-            <a href="#/" className={route === 'catalog' ? 'active' : ''}>Catálogo</a>
-            <a href="#/admin" className={route === 'admin' ? 'active' : ''}>Admin</a>
+            {links.map((l) => (
+              <a key={l.key} href={l.to} className={route === l.key ? 'active' : ''}>
+                {l.label}
+              </a>
+            ))}
           </nav>
+        </div>
+        <div className="header-actions">
           <button className="sacola-btn" onClick={onCartClick} aria-label="Abrir sacola">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 7h12l-1.2 12.2a2 2 0 0 1-2 1.8H9.2a2 2 0 0 1-2-1.8L6 7Z" />
               <path d="M9 7V5a3 3 0 0 1 6 0v2" />
             </svg>
-            Sacola
             {cartCount > 0 && <span className="sacola-badge">{cartCount}</span>}
+          </button>
+          <button
+            className="hamburger-btn"
+            onClick={() => setMenuOpen(true)}
+            aria-label="Abrir menu"
+            aria-expanded={menuOpen}
+          >
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
           </button>
         </div>
       </div>
+
+      <div className={`overlay ${menuOpen ? 'show' : ''}`} onClick={() => setMenuOpen(false)} />
+      <aside className={`mobile-menu ${menuOpen ? 'open' : ''}`} aria-hidden={!menuOpen}>
+        <div className="cart-head">
+          <h2>Menu</h2>
+          <button className="icon-btn" onClick={() => setMenuOpen(false)} aria-label="Fechar menu">✕</button>
+        </div>
+        <nav className="mobile-menu-nav">
+          {links.map((l) => (
+            <a
+              key={l.key}
+              href={l.to}
+              className={route === l.key ? 'active' : ''}
+              onClick={() => setMenuOpen(false)}
+            >
+              {l.label}
+            </a>
+          ))}
+        </nav>
+      </aside>
     </header>
   );
 }
@@ -121,9 +172,7 @@ function CartDrawer({
 }
 
 export function App() {
-  const [route, setRoute] = useState<'catalog' | 'admin'>(() =>
-    window.location.hash.startsWith('#/admin') ? 'admin' : 'catalog',
-  );
+  const [route, setRoute] = useState<Route>(parseRoute);
   const [products, setProducts] = useState<Product[] | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [cart, setCart] = useState<CartItem[]>(loadCart);
@@ -131,7 +180,10 @@ export function App() {
   const [whatsappNumber, setWhatsappNumber] = useState('5500999999999');
 
   useEffect(() => {
-    const onHash = () => setRoute(window.location.hash.startsWith('#/admin') ? 'admin' : 'catalog');
+    const onHash = () => {
+      setRoute(parseRoute());
+      window.scrollTo(0, 0);
+    };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
@@ -170,17 +222,18 @@ export function App() {
   const removeItem = (key: string) => setCart((prev) => prev.filter((i) => i.key !== key));
 
   const cartCount = cart.reduce((s, i) => s + i.qty, 0);
-  const refreshProducts = () => fetchProducts().then(setProducts).catch(() => {});
 
   return (
     <div className="app">
       <Header route={route} cartCount={cartCount} onCartClick={() => setCartOpen(true)} />
 
-      {route === 'catalog' ? (
-        <Catalog products={products} loadError={loadError} onAdd={addToCart} />
-      ) : (
-        <Admin onProductsChanged={refreshProducts} onWhatsappChanged={setWhatsappNumber} />
+      {route === 'home' && (
+        <HomePage products={products} loadError={loadError} onAdd={addToCart} />
       )}
+      {route === 'catalogo' && (
+        <CatalogPage products={products} loadError={loadError} onAdd={addToCart} />
+      )}
+      {route === 'contatos' && <ContactsPage whatsappNumber={whatsappNumber} />}
 
       <CartDrawer
         open={cartOpen}
@@ -192,7 +245,9 @@ export function App() {
       />
 
       <footer className="footer">
-        <span className="brand-footer">D<span className="brand-z">Z</span>AMP</span>
+        <span className="brand-footer">
+          D<span className="brand-z">Z</span>AMP
+        </span>
         <span className="muted">Catálogo digital · Estilo e atitude em cada detalhe.</span>
       </footer>
     </div>
