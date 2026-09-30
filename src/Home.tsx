@@ -1,5 +1,59 @@
+import { useEffect, useRef, useState } from 'react';
 import type { CartItem, Product } from './types';
 import { ProductCard } from './Catalog';
+
+const CAROUSEL_IMAGES = [
+  '/images/carousel/carousel-1.jpg',
+  '/images/carousel/carousel-2.jpg',
+  '/images/carousel/carousel-3.jpg',
+  '/images/carousel/carousel-4.jpg',
+];
+
+function HeroCarousel() {
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const timer = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (paused) return;
+    timer.current = window.setInterval(() => {
+      setIndex((i) => (i + 1) % CAROUSEL_IMAGES.length);
+    }, 4000);
+    return () => {
+      if (timer.current !== null) window.clearInterval(timer.current);
+    };
+  }, [paused]);
+
+  return (
+    <div
+      className="hero-carousel"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onTouchStart={() => setPaused(true)}
+      onTouchEnd={() => setPaused(false)}
+    >
+      <div className="hc-track" style={{ transform: `translateX(-${index * 100}%)` }}>
+        {CAROUSEL_IMAGES.map((src, i) => (
+          <div className="hc-slide" key={src} aria-hidden={i !== index}>
+            <img src={src} alt={`DZAMP coleção ${i + 1}`} loading={i === 0 ? 'eager' : 'lazy'} />
+          </div>
+        ))}
+      </div>
+      <div className="hc-dots" role="tablist" aria-label="Slides do carrossel">
+        {CAROUSEL_IMAGES.map((src, i) => (
+          <button
+            key={src}
+            className={`hc-dot ${i === index ? 'hc-dot-active' : ''}`}
+            onClick={() => setIndex(i)}
+            aria-label={`Ir para o slide ${i + 1}`}
+            aria-selected={i === index}
+            role="tab"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function HomePage({
   products,
@@ -12,33 +66,23 @@ export function HomePage({
 }) {
   const featured = (products ?? []).slice(0, 4);
 
-  const quickAdd = (product: Product) => {
-    onAdd({
-      productId: product.id,
-      title: product.title,
-      price: product.price,
-      size: (product.sizes[0] ?? 'P') as string,
-      note: '',
-      qty: 1,
-      image: product.images[0] ?? '',
-    });
-  };
-
   return (
     <main className="catalog">
       <section className="hero">
-        <p className="hero-eyebrow">Vestuário Esportivo Premium</p>
-        <h1>
-          Estilo, performance
-          <br />e proteção para todos.
-        </h1>
+        <p className="hero-eyebrow">Moda Masculina</p>
+        <h1>Estilo, conforto e elegância</h1>
         <p className="hero-copy">
-          Explore as coleções DZAMP: linha infantil, jovem/adulto e camisetas com proteção UV.
-          Escolha, monte sua sacola e finalize pelo WhatsApp.
+          Para os pequenos passos e as grandes conquistas.
+          <br />
+          Confira nosso catálogo completo e à pronta entrega.
         </p>
         <a className="btn btn-primary hero-cta" href="#/catalogo">
           Ver catálogo completo
         </a>
+      </section>
+
+      <section className="hero-carousel-wrap">
+        <HeroCarousel />
       </section>
 
       <section className="home-featured">
@@ -59,7 +103,7 @@ export function HomePage({
               key={p.id}
               product={p}
               onDetails={() => (window.location.hash = '#/catalogo')}
-              onQuickAdd={() => quickAdd(p)}
+              onAdd={onAdd}
             />
           ))}
         </div>

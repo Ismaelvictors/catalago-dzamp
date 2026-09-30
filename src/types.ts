@@ -1,4 +1,4 @@
-export type Category = 'infantil' | 'jovem_adulto' | 'protecao_uv';
+export type Category = 'infantil' | 'jovem' | 'adulto' | 'uv';
 
 export interface Product {
   id: string;
@@ -16,6 +16,8 @@ export interface CartItem {
   title: string;
   price: number;
   size: string;
+  color: string;
+  estampa: string;
   note: string;
   qty: number;
   image: string;

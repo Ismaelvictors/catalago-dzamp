@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import type { Category, CartItem, Product } from './types';
-import { CATEGORIES, CATEGORY_LABELS, formatBRL, sizesFor } from './lib';
+import { CATEGORIES, CATEGORY_LABELS, formatBRL } from './lib';
+import { lineFor, sizesFor } from './lines';
 
 export function CategoryChips({ active, onChange }: { active: Category | 'all'; onChange: (c: Category | 'all') => void }) {
   return (
@@ -18,7 +19,97 @@ export function CategoryChips({ active, onChange }: { active: Category | 'all'; 
   );
 }
 
-export function ProductCard({ product, onDetails, onQuickAdd }: { product: Product; onDetails: () => void; onQuickAdd: () => void }) {
+function ColorSelect({ value, colors, onChange, id }: { value: string; colors: { name: string; hex: string }[]; onChange: (v: string) => void; id: string }) {
+  const active = colors.find((c) => c.name === value);
+  return (
+    <div className="select-field">
+      <label htmlFor={id}>Cor</label>
+      <div className="select-wrap">
+        {active && <span className="select-dot" style={{ background: active.hex }} aria-hidden="true" />}
+        <select id={id} value={value} onChange={(e) => onChange(e.target.value)}>
+          {colors.map((c) => (
+            <option key={c.name} value={c.name}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}
+
+function EstampaSelect({ value, estampas, onChange, id }: { value: string; estampas: string[]; onChange: (v: string) => void; id: string }) {
+  return (
+    <div className="select-field">
+      <label htmlFor={id}>Estampa</label>
+      <div className="select-wrap">
+        <select id={id} value={value} onChange={(e) => onChange(e.target.value)}>
+          {estampas.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+}
+
+function SizePills({ sizes, value, onChange, error, note }: { sizes: string[]; value: string | null; onChange: (s: string) => void; error?: boolean; note?: string }) {
+  return (
+    <div className={`size-block ${error ? 'size-block-error' : ''}`}>
+      <div className="size-pills">
+        {sizes.map((s) => (
+          <button key={s} className={`size-pill ${value === s ? 'size-active' : ''}`} onClick={() => onChange(s)}>
+            {s}
+          </button>
+        ))}
+      </div>
+      {note && <p className="size-note">{note}</p>}
+    </div>
+  );
+}
+
+function QtyStepper({ value, onChange, small }: { value: number; onChange: (q: number) => void; small?: boolean }) {
+  return (
+    <div className={`qty-stepper ${small ? 'qty-stepper-sm' : ''}`}>
+      <button onClick={() => onChange(Math.max(1, value - 1))} aria-label="Diminuir quantidade">−</button>
+      <span>{value}</span>
+      <button onClick={() => onChange(Math.min(99, value + 1))} aria-label="Aumentar quantidade">+</button>
+    </div>
+  );
+}
+
+export function ProductCard({ product, onDetails, onAdd }: { product: Product; onDetails: () => void; onAdd: (item: Omit<CartItem, 'key'>) => void }) {
+  const line = lineFor(product.category);
+  const [color, setColor] = useState(line.colors[0].name);
+  const [estampa, setEstampa] = useState(line.estampas[0] ?? '');
+  const [size, setSize] = useState<string | null>(line.sizes.length === 1 ? line.sizes[0] : null);
+  const [qty, setQty] = useState(1);
+  const [sizeError, setSizeError] = useState(false);
+  const sizes = sizesFor(product.category);
+
+  const handleAdd = () => {
+    if (!size) {
+      setSizeError(true);
+      return;
+    }
+    onAdd({
+      productId: product.id,
+      title: product.title,
+      price: product.price,
+      size,
+      color,
+      estampa: line.hasEstampa ? estampa : '',
+      note: '',
+      qty,
+      image: product.images[0] ?? '',
+    });
+    setSize(line.sizes.length === 1 ? line.sizes[0] : null);
+    setQty(1);
+    setSizeError(false);
+  };
+
   return (
     <article className="card">
       <button className="card-media" onClick={onDetails} aria-label={`Ver detalhes de ${product.title}`}>
@@ -28,9 +119,31 @@ export function ProductCard({ product, onDetails, onQuickAdd }: { product: Produ
       <div className="card-body">
         <h3>{product.title}</h3>
         <p className="card-price">{formatBRL(product.price)}</p>
-        <div className="card-actions">
-          <button className="btn btn-outline" onClick={onDetails}>Ver detalhes</button>
-          <button className="btn btn-primary" onClick={onQuickAdd}>Adicionar à Sacola</button>
+
+        <div className="card-selects">
+          <ColorSelect id={`card-color-${product.id}`} value={color} colors={line.colors} onChange={setColor} />
+          {line.hasEstampa && (
+            <EstampaSelect id={`card-estampa-${product.id}`} value={estampa} estampas={line.estampas} onChange={setEstampa} />
+          )}
+          <SizePills
+            sizes={sizes}
+            value={size}
+            onChange={(s) => {
+              setSize(s);
+              setSizeError(false);
+            }}
+            error={sizeError}
+            note={sizeError ? 'Selecione um tamanho.' : undefined}
+          />
+          <div className="card-buy-row">
+            <QtyStepper value={qty} onChange={setQty} small />
+            <button className="btn btn-primary card-add" onClick={handleAdd}>
+              Adicionar
+            </button>
+          </div>
+          <button className="card-details-link" onClick={onDetails}>
+            Ver detalhes
+          </button>
         </div>
       </div>
     </article>
@@ -46,11 +159,15 @@ function ProductModal({
   onClose: () => void;
   onAdd: (item: Omit<CartItem, 'key'>) => void;
 }) {
+  const line = lineFor(product.category);
   const [imageIndex, setImageIndex] = useState(0);
-  const [size, setSize] = useState<string | null>(null);
+  const [color, setColor] = useState(line.colors[0].name);
+  const [estampa, setEstampa] = useState(line.estampas[0] ?? '');
+  const [size, setSize] = useState<string | null>(line.sizes.length === 1 ? line.sizes[0] : null);
+  const [qty, setQty] = useState(1);
   const [note, setNote] = useState('');
   const [sizeError, setSizeError] = useState(false);
-  const sizes = product.sizes.length > 0 ? product.sizes : sizesFor(product.category);
+  const sizes = sizesFor(product.category);
 
   const handleAdd = () => {
     if (!size) {
@@ -62,8 +179,10 @@ function ProductModal({
       title: product.title,
       price: product.price,
       size,
+      color,
+      estampa: line.hasEstampa ? estampa : '',
       note: note.trim(),
-      qty: 1,
+      qty,
       image: product.images[0] ?? '',
     });
   };
@@ -116,25 +235,33 @@ function ProductModal({
           <p className="pm-price">{formatBRL(product.price)}</p>
           {product.description && <p className="pm-desc">{product.description}</p>}
 
+          <div className="pm-options">
+            <ColorSelect id={`pm-color`} value={color} colors={line.colors} onChange={setColor} />
+            {line.hasEstampa && (
+              <EstampaSelect id={`pm-estampa`} value={estampa} estampas={line.estampas} onChange={setEstampa} />
+            )}
+          </div>
+
           <div className="pm-sizes">
             <label>
               Tamanho <span className="required">*</span>
             </label>
-            <div className="size-pills">
-              {sizes.map((s) => (
-                <button
-                  key={s}
-                  className={`size-pill ${size === s ? 'size-active' : ''}`}
-                  onClick={() => {
-                    setSize(s);
-                    setSizeError(false);
-                  }}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
-            {sizeError && <p className="field-error">Selecione um tamanho para continuar.</p>}
+            <SizePills
+              sizes={sizes}
+              value={size}
+              onChange={(s) => {
+                setSize(s);
+                setSizeError(false);
+              }}
+              error={sizeError}
+              note={line.sizesNote ?? (sizeError ? 'Selecione um tamanho para continuar.' : undefined)}
+            />
+            {sizeError && !line.sizesNote && <p className="field-error">Selecione um tamanho para continuar.</p>}
+          </div>
+
+          <div className="pm-qty">
+            <label>Quantidade</label>
+            <QtyStepper value={qty} onChange={setQty} />
           </div>
 
           <div className="pm-note">
@@ -175,20 +302,6 @@ export function CatalogPage({
     [products, category],
   );
 
-  const quickAdd = (product: Product) => {
-    const sizes = product.sizes.length > 0 ? product.sizes : sizesFor(product.category);
-    // Quick add uses the first available size; the customer can adjust it in the modal.
-    onAdd({
-      productId: product.id,
-      title: product.title,
-      price: product.price,
-      size: sizes[0] ?? 'P',
-      note: '',
-      qty: 1,
-      image: product.images[0] ?? '',
-    });
-  };
-
   return (
     <main className="catalog">
       <div className="chips-bar">
@@ -217,7 +330,7 @@ export function CatalogPage({
             key={p.id}
             product={p}
             onDetails={() => setSelected(p)}
-            onQuickAdd={() => quickAdd(p)}
+            onAdd={onAdd}
           />
         ))}
       </div>

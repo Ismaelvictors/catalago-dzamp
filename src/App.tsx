@@ -136,7 +136,10 @@ function CartDrawer({
                   <img src={item.image} alt={item.title} className="cart-thumb" />
                   <div className="cart-item-info">
                     <strong>{item.title}</strong>
-                    <span className="muted">Tamanho: {item.size}</span>
+                    <span className="muted">
+                      Tamanho: {item.size} · Cor: {item.color}
+                      {item.estampa ? ` · Estampa: ${item.estampa}` : ''}
+                    </span>
                     {item.note && <span className="muted cart-note">Obs: {item.note}</span>}
                     <div className="qty-row">
                       <button className="qty-btn" onClick={() => onUpdateQty(item.key, -1)} aria-label="Diminuir">−</button>
@@ -200,7 +203,7 @@ export function App() {
   }, [cart]);
 
   const addToCart = (item: Omit<CartItem, 'key'>) => {
-    const key = `${item.productId}|${item.size}|${item.note}`;
+    const key = `${item.productId}|${item.size}|${item.color}|${item.estampa}|${item.note}`;
     setCart((prev) => {
       const existing = prev.find((i) => i.key === key);
       if (existing) {
